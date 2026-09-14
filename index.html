@@ -22,6 +22,7 @@
             min-height: 100vh;
         }
 
+
         /* =========================
            MAIN PAGE
            ========================= */
@@ -44,7 +45,7 @@
         .css-forms {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 34px;
         }
 
         .css-form {
@@ -128,6 +129,48 @@
             transform: translateY(1px);
         }
 
+
+        /* =========================
+           DAILY GOAL
+           ========================= */
+
+        .css-progress {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+            height: 8px;
+            margin-top: 12px;
+        }
+
+        .css-progress-section {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            border-radius: 3px;
+            background: #4a4a4d;
+        }
+
+        .css-progress-section.css-done {
+            background: #a0a0a5;
+        }
+
+        .css-progress-section.css-complete {
+            background: #22c55e;
+        }
+
+        .css-goal-text {
+            margin-top: 7px;
+            color: #756d7c;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: right;
+        }
+
+
+        /* =========================
+           ADD BUTTON
+           ========================= */
+
         .css-add {
             width: 100%;
             height: 64px;
@@ -184,6 +227,20 @@
             width: min(78vw, 330px);
             height: min(78vw, 330px);
             margin: 0 auto;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .css-circle.css-hold {
+            background: #facc15;
+        }
+
+        .css-circle.css-rest {
+            background: #22c55e;
+        }
+
+        .css-circle.css-ready {
+            background: #28232d;
         }
 
         .css-circle-svg {
@@ -196,13 +253,13 @@
 
         .css-circle-background {
             fill: none;
-            stroke: #28232d;
+            stroke: rgba(0, 0, 0, 0.18);
             stroke-width: 12;
         }
 
         .css-circle-progress {
             fill: none;
-            stroke: #7c3aed;
+            stroke: #ffffff;
             stroke-width: 12;
             stroke-linecap: round;
         }
@@ -216,10 +273,17 @@
         }
 
         .css-countdown {
+            color: #111111;
             font-size: 76px;
             line-height: 1;
             font-weight: 900;
             letter-spacing: -4px;
+        }
+
+        .css-ready-text {
+            color: #ffffff;
+            font-size: 42px;
+            font-weight: 900;
         }
 
         .css-success {
@@ -270,10 +334,10 @@
         <div class="css-timer-content">
 
             <div class="css-phase js-phase">
-                Hold
+                Ready?
             </div>
 
-            <div class="css-circle">
+            <div class="css-circle css-ready js-circle">
 
                 <svg
                     class="css-circle-svg"
@@ -297,7 +361,14 @@
                 <div class="css-circle-center">
 
                     <div class="css-countdown js-countdown">
-                        1
+                        3
+                    </div>
+
+                    <div
+                        class="css-ready-text js-ready-text"
+                        hidden
+                    >
+                        Ready?
                     </div>
 
                     <div
@@ -321,13 +392,7 @@
 
 
     <script>
-        /*
-         * =========================
-         * STORAGE
-         * =========================
-         */
-
-        const STORAGE_KEY = 'exercises';
+        const STORAGE_KEY = 'Exercises';
 
         const formsContainer =
             document.querySelector('.js-forms');
@@ -344,6 +409,9 @@
         const countdownDisplay =
             document.querySelector('.js-countdown');
 
+        const readyDisplay =
+            document.querySelector('.js-ready-text');
+
         const successDisplay =
             document.querySelector('.js-success');
 
@@ -353,12 +421,9 @@
         const progress =
             document.querySelector('.js-progress');
 
+        const circle =
+            document.querySelector('.js-circle');
 
-        /*
-         * =========================
-         * TIMER
-         * =========================
-         */
 
         const radius = 135;
 
@@ -371,11 +436,9 @@
         let timer = null;
 
 
-        /*
-         * =========================
-         * LOAD / SAVE
-         * =========================
-         */
+        /* =========================
+           STORAGE
+           ========================= */
 
         function loadForms() {
 
@@ -403,30 +466,269 @@
         }
 
 
-        /*
-         * =========================
-         * CREATE FORM
-         * =========================
-         */
+        function getToday() {
+
+            const now = new Date();
+
+            const year =
+                now.getFullYear();
+
+            const month =
+                String(now.getMonth() + 1)
+                    .padStart(2, '0');
+
+            const day =
+                String(now.getDate())
+                    .padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+
+        /* =========================
+           FORM SETTINGS
+           ========================= */
+
+        function getFormSettings(form) {
+
+            const hold =
+                Math.max(
+                    1,
+                    Math.floor(
+                        Number(
+                            form.querySelector('.js-hold').value
+                        ) || 1
+                    )
+                );
+
+            const rest =
+                Math.max(
+                    1,
+                    Math.floor(
+                        Number(
+                            form.querySelector('.js-rest').value
+                        ) || 1
+                    )
+                );
+
+            const repeat =
+                Math.max(
+                    1,
+                    Math.floor(
+                        Number(
+                            form.querySelector('.js-repeat-input').value
+                        ) || 1
+                    )
+                );
+
+            const goalInput =
+                form.querySelector('.js-day-goal');
+
+            const goalValue =
+                Number(goalInput.value);
+
+            const dayGoal =
+                goalInput.value.trim() === ''
+                    ? null
+                    : Math.max(
+                        1,
+                        Math.floor(
+                            goalValue || 1
+                        )
+                    );
+
+            return {
+                hold,
+                rest,
+                repeat,
+                dayGoal
+            };
+        }
+
+
+        function saveForm(form) {
+
+            const forms = loadForms();
+
+            const id =
+                form.dataset.id;
+
+            const oldData =
+                forms[id] || {};
+
+            forms[id] = {
+                ...oldData,
+                ...getFormSettings(form)
+            };
+
+            saveForms(forms);
+
+            updateProgress(form);
+        }
+
+
+        /* =========================
+           DAILY PROGRESS
+           ========================= */
+
+        function getTodayCount(data) {
+
+            const today =
+                getToday();
+
+            if (!data.history) {
+                return 0;
+            }
+
+            return Number(
+                data.history[today] || 0
+            );
+        }
+
+
+        function increaseTodayCount(id) {
+
+            const forms =
+                loadForms();
+
+            if (!forms[id]) {
+                return;
+            }
+
+            const today =
+                getToday();
+
+            if (!forms[id].history) {
+                forms[id].history = {};
+            }
+
+            forms[id].history[today] =
+                Number(
+                    forms[id].history[today] || 0
+                ) + 1;
+
+            saveForms(forms);
+        }
+
+
+        function updateProgress(form) {
+
+            const id =
+                form.dataset.id;
+
+            const forms =
+                loadForms();
+
+            const data =
+                forms[id];
+
+            const progressContainer =
+                form.querySelector('.js-progress');
+
+            const goalText =
+                form.querySelector('.js-goal-text');
+
+            progressContainer.innerHTML = '';
+
+            if (
+                !data ||
+                !data.dayGoal
+            ) {
+
+                progressContainer.hidden =
+                    true;
+
+                goalText.hidden =
+                    true;
+
+                return;
+            }
+
+            progressContainer.hidden =
+                false;
+
+            goalText.hidden =
+                false;
+
+            const goal =
+                Number(data.dayGoal);
+
+            const completed =
+                getTodayCount(data);
+
+            const reachedGoal =
+                completed >= goal;
+
+
+            for (
+                let i = 0;
+                i < goal;
+                i++
+            ) {
+
+                const section =
+                    document.createElement('div');
+
+                section.className =
+                    'css-progress-section';
+
+                if (reachedGoal) {
+
+                    section.classList.add(
+                        'css-complete'
+                    );
+
+                } else if (
+                    i < completed
+                ) {
+
+                    section.classList.add(
+                        'css-done'
+                    );
+                }
+
+                progressContainer.appendChild(
+                    section
+                );
+            }
+
+
+            goalText.textContent =
+                `${Math.min(completed, goal)} / ${goal} today`;
+        }
+
+
+        /* =========================
+           CREATE FORM
+           ========================= */
 
         function createForm(id, data) {
 
-            const form = document.createElement('div');
+            const form =
+                document.createElement('div');
 
-            form.className = 'css-form';
+            form.className =
+                'css-form';
 
-            form.dataset.id = id;
+            form.dataset.id =
+                id;
+
 
             form.innerHTML = `
+
                 <div class="css-form-header">
+
                     <div class="css-form-id">
                         Exercise ${id}
                     </div>
+
                 </div>
+
 
                 <div class="css-fields">
 
                     <div class="css-field">
+
                         <label class="css-label">
                             Hold
                         </label>
@@ -436,11 +738,14 @@
                             type="number"
                             min="1"
                             step="1"
-                            value="${data.hold}"
+                            value="${data.hold ?? 1}"
                         >
+
                     </div>
 
+
                     <div class="css-field">
+
                         <label class="css-label">
                             Rest
                         </label>
@@ -450,11 +755,14 @@
                             type="number"
                             min="1"
                             step="1"
-                            value="${data.rest}"
+                            value="${data.rest ?? 1}"
                         >
+
                     </div>
 
+
                     <div class="css-field">
+
                         <label class="css-label">
                             Repeat
                         </label>
@@ -464,11 +772,41 @@
                             type="number"
                             min="1"
                             step="1"
-                            value="${data.repeat}"
+                            value="${data.repeat ?? 1}"
                         >
+
+                    </div>
+
+
+                    <div class="css-field">
+
+                        <label class="css-label">
+                            Day goal
+                        </label>
+
+                        <input
+                            class="css-input js-day-goal"
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="—"
+                            value="${data.dayGoal ?? ''}"
+                        >
+
                     </div>
 
                 </div>
+
+
+                <div
+                    class="css-progress js-progress"
+                ></div>
+
+
+                <div
+                    class="css-goal-text js-goal-text"
+                ></div>
+
 
                 <button
                     class="css-start js-start"
@@ -479,38 +817,37 @@
             `;
 
 
-            /*
-             * Save this form whenever
-             * one of its fields changes.
-             */
-
             const inputs =
-                form.querySelectorAll('.js-hold, .js-rest, .js-repeat-input');
+                form.querySelectorAll(
+                    '.js-hold, ' +
+                    '.js-rest, ' +
+                    '.js-repeat-input, ' +
+                    '.js-day-goal'
+                );
+
 
             inputs.forEach(input => {
 
-                input.addEventListener('input', () => {
+                input.addEventListener(
+                    'input',
+                    () => {
+                        saveForm(form);
+                    }
+                );
 
-                    saveForm(form);
-
-                });
-
-                input.addEventListener('change', () => {
-
-                    saveForm(form);
-
-                });
+                input.addEventListener(
+                    'change',
+                    () => {
+                        saveForm(form);
+                    }
+                );
 
             });
 
 
-            /*
-             * Start button belongs
-             * only to this form.
-             */
-
             const startButton =
                 form.querySelector('.js-start');
+
 
             startButton.addEventListener(
                 'click',
@@ -521,6 +858,18 @@
                     const settings =
                         getFormSettings(form);
 
+                    const id =
+                        form.dataset.id;
+
+
+                    /*
+                     * Count one completed exercise
+                     * when Start is pressed.
+                     */
+                    increaseTodayCount(id);
+
+                    updateProgress(form);
+
                     startExercise(settings);
 
                 }
@@ -528,64 +877,19 @@
 
 
             formsContainer.appendChild(form);
+
+            updateProgress(form);
         }
 
 
-        function getFormSettings(form) {
-
-            return {
-                hold: Math.max(
-                    1,
-                    Math.floor(
-                        Number(
-                            form.querySelector('.js-hold').value
-                        ) || 1
-                    )
-                ),
-
-                rest: Math.max(
-                    1,
-                    Math.floor(
-                        Number(
-                            form.querySelector('.js-rest').value
-                        ) || 1
-                    )
-                ),
-
-                repeat: Math.max(
-                    1,
-                    Math.floor(
-                        Number(
-                            form.querySelector('.js-repeat-input').value
-                        ) || 1
-                    )
-                )
-            };
-        }
-
-
-        function saveForm(form) {
-
-            const forms = loadForms();
-
-            const id = form.dataset.id;
-
-            forms[id] =
-                getFormSettings(form);
-
-            saveForms(forms);
-        }
-
-
-        /*
-         * =========================
-         * ADD FORM
-         * =========================
-         */
+        /* =========================
+           NEXT ID
+           ========================= */
 
         function getNextId() {
 
-            const forms = loadForms();
+            const forms =
+                loadForms();
 
             const ids =
                 Object.keys(forms)
@@ -600,74 +904,118 @@
         }
 
 
-        addButton.addEventListener('click', () => {
+        /* =========================
+           ADD FORM
+           ========================= */
 
-            const id = getNextId();
+        addButton.addEventListener(
+            'click',
+            () => {
 
-            const data = {
-                hold: 1,
-                rest: 1,
-                repeat: 1
-            };
+                const id =
+                    getNextId();
 
-            const forms = loadForms();
+                const data = {
+                    hold: 1,
+                    rest: 1,
+                    repeat: 1,
+                    dayGoal: null,
+                    history: {}
+                };
 
-            forms[id] = data;
+                const forms =
+                    loadForms();
 
-            saveForms(forms);
+                forms[id] =
+                    data;
 
-            createForm(id, data);
+                saveForms(forms);
 
-        });
+                createForm(
+                    id,
+                    data
+                );
+            }
+        );
 
 
-        /*
-         * =========================
-         * RESTORE FORMS
-         * =========================
-         */
+        /* =========================
+           RESTORE FORMS
+           ========================= */
 
         function restoreForms() {
 
-            const forms = loadForms();
+            const forms =
+                loadForms();
 
             const ids =
                 Object.keys(forms)
-                    .sort((a, b) => Number(a) - Number(b));
+                    .sort(
+                        (a, b) =>
+                            Number(a) - Number(b)
+                    );
+
 
             if (ids.length === 0) {
 
                 const data = {
                     hold: 1,
                     rest: 1,
-                    repeat: 1
+                    repeat: 1,
+                    dayGoal: null,
+                    history: {}
                 };
 
-                forms[1] = data;
+                forms[1] =
+                    data;
 
                 saveForms(forms);
 
-                createForm(1, data);
+                createForm(
+                    1,
+                    data
+                );
 
                 return;
             }
 
+
             ids.forEach(id => {
+
+                const data =
+                    forms[id];
+
+                /*
+                 * Backward compatibility with
+                 * previously saved forms.
+                 */
+                if (
+                    data.dayGoal === undefined
+                ) {
+                    data.dayGoal = null;
+                }
+
+                if (
+                    !data.history
+                ) {
+                    data.history = {};
+                }
+
 
                 createForm(
                     id,
-                    forms[id]
+                    data
                 );
-
             });
+
+
+            saveForms(forms);
         }
 
 
-        /*
-         * =========================
-         * START EXERCISE
-         * =========================
-         */
+        /* =========================
+           TIMER
+           ========================= */
 
         function startExercise(settings) {
 
@@ -677,23 +1025,128 @@
                 'css-active'
             );
 
-            successDisplay.hidden = true;
-            countdownDisplay.hidden = false;
+            successDisplay.hidden =
+                true;
 
-            runRepeat(
-                1,
-                settings.repeat,
-                settings.hold,
-                settings.rest
+            readyDisplay.hidden =
+                true;
+
+            countdownDisplay.hidden =
+                false;
+
+            circle.className =
+                'css-circle css-ready';
+
+            progress.style.strokeDashoffset =
+                circumference;
+
+            phaseDisplay.textContent =
+                'Ready?';
+
+
+            /*
+             * Ready?
+             */
+            runReadyCountdown(
+                3,
+                () => {
+
+                    runRepeat(
+                        1,
+                        settings.repeat,
+                        settings.hold,
+                        settings.rest
+                    );
+
+                }
             );
         }
 
 
-        /*
-         * =========================
-         * REPEAT
-         * =========================
-         */
+        /* =========================
+           READY COUNTDOWN
+           ========================= */
+
+        function runReadyCountdown(
+            seconds,
+            onComplete
+        ) {
+
+            clearInterval(timer);
+
+            phaseDisplay.textContent =
+                'Ready?';
+
+            circle.className =
+                'css-circle css-ready';
+
+            let remaining =
+                seconds;
+
+            countdownDisplay.hidden =
+                false;
+
+            readyDisplay.hidden =
+                true;
+
+            countdownDisplay.textContent =
+                remaining;
+
+
+            const startTime =
+                Date.now();
+
+
+            function update() {
+
+                const elapsed =
+                    Date.now() - startTime;
+
+                const current =
+                    Math.ceil(
+                        seconds -
+                        elapsed / 1000
+                    );
+
+
+                if (current !== remaining) {
+
+                    remaining =
+                        Math.max(
+                            0,
+                            current
+                        );
+
+                    countdownDisplay.textContent =
+                        remaining;
+                }
+
+
+                if (elapsed >= seconds * 1000) {
+
+                    clearInterval(timer);
+
+                    countdownDisplay.textContent =
+                        '';
+
+                    onComplete();
+                }
+            }
+
+
+            timer =
+                setInterval(
+                    update,
+                    30
+                );
+
+            update();
+        }
+
+
+        /* =========================
+           REPEATS
+           ========================= */
 
         function runRepeat(
             currentRepeat,
@@ -709,11 +1162,13 @@
             runPhase(
                 'Hold',
                 hold,
+                'hold',
                 () => {
 
                     runPhase(
                         'Rest',
                         rest,
+                        'rest',
                         () => {
 
                             if (
@@ -742,15 +1197,14 @@
         }
 
 
-        /*
-         * =========================
-         * TIMER PHASE
-         * =========================
-         */
+        /* =========================
+           TIMER PHASE
+           ========================= */
 
         function runPhase(
             phase,
             duration,
+            phaseClass,
             onComplete
         ) {
 
@@ -762,8 +1216,16 @@
             countdownDisplay.hidden =
                 false;
 
+            readyDisplay.hidden =
+                true;
+
             successDisplay.hidden =
                 true;
+
+
+            circle.className =
+                `css-circle css-${phaseClass}`;
+
 
             const startTime =
                 Date.now();
@@ -775,18 +1237,22 @@
             function update() {
 
                 const elapsed =
-                    Date.now() - startTime;
+                    Date.now() -
+                    startTime;
 
                 const remainingMs =
                     Math.max(
                         0,
-                        durationMs - elapsed
+                        durationMs -
+                        elapsed
                     );
+
 
                 const remainingSeconds =
                     Math.ceil(
                         remainingMs / 1000
                     );
+
 
                 countdownDisplay.textContent =
                     remainingSeconds;
@@ -794,14 +1260,20 @@
 
                 const progressAmount =
                     1 -
-                    (remainingMs / durationMs);
+                    (
+                        remainingMs /
+                        durationMs
+                    );
+
 
                 progress.style.strokeDashoffset =
                     circumference *
                     progressAmount;
 
 
-                if (remainingMs <= 0) {
+                if (
+                    remainingMs <= 0
+                ) {
 
                     clearInterval(timer);
 
@@ -816,27 +1288,35 @@
             update();
 
             timer =
-                setInterval(update, 50);
+                setInterval(
+                    update,
+                    50
+                );
         }
 
 
-        /*
-         * =========================
-         * SUCCESS
-         * =========================
-         */
+        /* =========================
+           SUCCESS
+           ========================= */
 
         function showSuccess() {
 
             clearInterval(timer);
 
-            phaseDisplay.textContent = '';
+            phaseDisplay.textContent =
+                '';
 
             countdownDisplay.hidden =
                 true;
 
+            readyDisplay.hidden =
+                true;
+
             successDisplay.hidden =
                 false;
+
+            circle.className =
+                'css-circle css-ready';
 
             progress.style.strokeDashoffset =
                 circumference;
@@ -845,33 +1325,37 @@
                 '';
 
 
-            setTimeout(() => {
+            setTimeout(
+                () => {
 
-                timerScreen.classList.remove(
-                    'css-active'
-                );
+                    timerScreen.classList.remove(
+                        'css-active'
+                    );
 
-                countdownDisplay.hidden =
-                    false;
+                    countdownDisplay.hidden =
+                        false;
 
-                successDisplay.hidden =
-                    true;
+                    successDisplay.hidden =
+                        true;
 
-                phaseDisplay.textContent =
-                    'Hold';
+                    phaseDisplay.textContent =
+                        'Ready?';
 
-                progress.style.strokeDashoffset =
-                    0;
+                    circle.className =
+                        'css-circle css-ready';
 
-            }, 1800);
+                    progress.style.strokeDashoffset =
+                        circumference;
+
+                },
+                1800
+            );
         }
 
 
-        /*
-         * =========================
-         * INITIALIZE
-         * =========================
-         */
+        /* =========================
+           START
+           ========================= */
 
         restoreForms();
 
