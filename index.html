@@ -68,6 +68,38 @@
             text-transform: uppercase;
         }
 
+        .css-form-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .css-graph {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            height: 34px;
+            padding: 0 9px;
+            border: 1px solid #30263d;
+            border-radius: 9px;
+            background: #151217;
+            color: #a99bb5;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .css-graph:hover {
+            border-color: #7c3aed;
+            color: #c4b5fd;
+        }
+
+        .css-graph-icon {
+            width: 15px;
+            height: 15px;
+        }
+
         .css-fields {
             display: flex;
             flex-direction: column;
@@ -136,26 +168,38 @@
 
         .css-progress {
             display: flex;
-            gap: 4px;
+            align-items: center;
+            gap: 5px;
             width: 100%;
-            height: 8px;
+            height: 12px;
             margin-top: 12px;
         }
 
         .css-progress-section {
             flex: 1;
             min-width: 0;
-            height: 100%;
+            height: 10px;
+            border: 1px dotted #5a5a5f;
             border-radius: 3px;
-            background: #4a4a4d;
+            background: transparent;
         }
 
         .css-progress-section.css-done {
-            background: #a0a0a5;
+            border: 0;
+            background: #8a8a8f;
         }
 
         .css-progress-section.css-complete {
+            border: 0;
             background: #22c55e;
+        }
+
+        .css-progress-check {
+            flex: 0 0 auto;
+            color: #22c55e;
+            font-size: 18px;
+            line-height: 1;
+            font-weight: 900;
         }
 
         .css-goal-text {
@@ -298,6 +342,148 @@
             font-size: 16px;
             font-weight: 700;
         }
+
+
+        /* =========================
+           STATISTICS SCREEN
+           ========================= */
+
+        .css-screen-statistics {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            display: none;
+            overflow-y: auto;
+            background: #0d0d0f;
+        }
+
+        .css-screen-statistics.css-active {
+            display: block;
+        }
+
+        .css-statistics-content {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .css-statistics-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .css-statistics-title {
+            margin: 0;
+            font-size: 32px;
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .css-close {
+            width: 42px;
+            height: 42px;
+            border: 1px solid #30263d;
+            border-radius: 12px;
+            background: #151217;
+            color: #ffffff;
+            font-size: 25px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .css-statistics-subtitle {
+            margin: 0 0 22px;
+            color: #756d7c;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .css-calendar {
+            border: 1px solid #30263d;
+            border-radius: 16px;
+            padding: 16px;
+            background: #151217;
+        }
+
+        .css-calendar-month {
+            margin-bottom: 18px;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .css-calendar-weekdays,
+        .css-calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .css-calendar-weekday {
+            color: #756d7c;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .css-calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            min-width: 0;
+            border-radius: 8px;
+            color: #77777d;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .css-calendar-day.css-day-complete {
+            background: #22c55e;
+            color: #07130b;
+            margin: 5px;
+        }
+
+        .css-calendar-day.css-day-today {
+            outline: 1px solid #7c3aed;
+            outline-offset: 2px;
+        }
+
+        .css-calendar-day.css-empty {
+            visibility: hidden;
+        }
+
+        .css-statistics-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .css-statistic {
+            padding: 16px;
+            border: 1px solid #30263d;
+            border-radius: 14px;
+            background: #151217;
+        }
+
+        .css-statistic-label {
+            color: #756d7c;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .css-statistic-value {
+            margin-top: 5px;
+            font-size: 26px;
+            font-weight: 900;
+        }
     </style>
 </head>
 
@@ -326,7 +512,7 @@
 
 
     <!-- =========================
-         SCREEN 2
+         SCREEN 2 - TIMER
          ========================= -->
 
     <section class="css-screen-timer js-timer-screen">
@@ -391,8 +577,92 @@
     </section>
 
 
+    <!-- =========================
+         SCREEN 3 - STATISTICS
+         ========================= -->
+
+    <section class="css-screen-statistics js-statistics-screen">
+
+        <div class="css-statistics-content">
+
+            <div class="css-statistics-header">
+
+                <h2 class="css-statistics-title js-statistics-title">
+                    Statistics
+                </h2>
+
+                <button
+                    class="css-close js-close-statistics"
+                    type="button"
+                    aria-label="Close statistics"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <p class="css-statistics-subtitle js-statistics-subtitle">
+                Day goal
+            </p>
+
+            <div class="css-calendar">
+
+                <div class="css-calendar-month js-calendar-month">
+                    Month
+                </div>
+
+                <div class="css-calendar-weekdays">
+
+                    <div class="css-calendar-weekday">Mon</div>
+                    <div class="css-calendar-weekday">Tue</div>
+                    <div class="css-calendar-weekday">Wed</div>
+                    <div class="css-calendar-weekday">Thu</div>
+                    <div class="css-calendar-weekday">Fri</div>
+                    <div class="css-calendar-weekday">Sat</div>
+                    <div class="css-calendar-weekday">Sun</div>
+
+                </div>
+
+                <div class="css-calendar-days js-calendar-days"></div>
+
+            </div>
+
+            <div class="css-statistics-summary">
+
+                <div class="css-statistic">
+
+                    <div class="css-statistic-label">
+                        Achieved
+                    </div>
+
+                    <div class="css-statistic-value js-achieved">
+                        0
+                    </div>
+
+                </div>
+
+                <div class="css-statistic">
+
+                    <div class="css-statistic-label">
+                        Days
+                    </div>
+
+                    <div class="css-statistic-value js-total-days">
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
     <script>
-        const STORAGE_KEY = 'Exercises';
+        const STORAGE_KEY =
+            'Exercises';
 
         const formsContainer =
             document.querySelector('.js-forms');
@@ -402,6 +672,9 @@
 
         const timerScreen =
             document.querySelector('.js-timer-screen');
+
+        const statisticsScreen =
+            document.querySelector('.js-statistics-screen');
 
         const phaseDisplay =
             document.querySelector('.js-phase');
@@ -423,6 +696,27 @@
 
         const circle =
             document.querySelector('.js-circle');
+
+        const statisticsTitle =
+            document.querySelector('.js-statistics-title');
+
+        const statisticsSubtitle =
+            document.querySelector('.js-statistics-subtitle');
+
+        const calendarMonth =
+            document.querySelector('.js-calendar-month');
+
+        const calendarDays =
+            document.querySelector('.js-calendar-days');
+
+        const achievedDisplay =
+            document.querySelector('.js-achieved');
+
+        const totalDaysDisplay =
+            document.querySelector('.js-total-days');
+
+        const closeStatisticsButton =
+            document.querySelector('.js-close-statistics');
 
 
         const radius = 135;
@@ -468,18 +762,21 @@
 
         function getToday() {
 
-            const now = new Date();
+            const now =
+                new Date();
 
             const year =
                 now.getFullYear();
 
             const month =
-                String(now.getMonth() + 1)
-                    .padStart(2, '0');
+                String(
+                    now.getMonth() + 1
+                ).padStart(2, '0');
 
             const day =
-                String(now.getDate())
-                    .padStart(2, '0');
+                String(
+                    now.getDate()
+                ).padStart(2, '0');
 
             return `${year}-${month}-${day}`;
         }
@@ -496,7 +793,9 @@
                     1,
                     Math.floor(
                         Number(
-                            form.querySelector('.js-hold').value
+                            form.querySelector(
+                                '.js-hold'
+                            ).value
                         ) || 1
                     )
                 );
@@ -506,7 +805,9 @@
                     1,
                     Math.floor(
                         Number(
-                            form.querySelector('.js-rest').value
+                            form.querySelector(
+                                '.js-rest'
+                            ).value
                         ) || 1
                     )
                 );
@@ -516,16 +817,17 @@
                     1,
                     Math.floor(
                         Number(
-                            form.querySelector('.js-repeat-input').value
+                            form.querySelector(
+                                '.js-repeat-input'
+                            ).value
                         ) || 1
                     )
                 );
 
             const goalInput =
-                form.querySelector('.js-day-goal');
-
-            const goalValue =
-                Number(goalInput.value);
+                form.querySelector(
+                    '.js-day-goal'
+                );
 
             const dayGoal =
                 goalInput.value.trim() === ''
@@ -533,7 +835,9 @@
                     : Math.max(
                         1,
                         Math.floor(
-                            goalValue || 1
+                            Number(
+                                goalInput.value
+                            ) || 1
                         )
                     );
 
@@ -548,7 +852,8 @@
 
         function saveForm(form) {
 
-            const forms = loadForms();
+            const forms =
+                loadForms();
 
             const id =
                 form.dataset.id;
@@ -623,12 +928,17 @@
                 forms[id];
 
             const progressContainer =
-                form.querySelector('.js-progress');
+                form.querySelector(
+                    '.js-progress'
+                );
 
             const goalText =
-                form.querySelector('.js-goal-text');
+                form.querySelector(
+                    '.js-goal-text'
+                );
 
-            progressContainer.innerHTML = '';
+            progressContainer.innerHTML =
+                '';
 
             if (
                 !data ||
@@ -667,10 +977,13 @@
             ) {
 
                 const section =
-                    document.createElement('div');
+                    document.createElement(
+                        'div'
+                    );
 
                 section.className =
                     'css-progress-section';
+
 
                 if (reachedGoal) {
 
@@ -687,14 +1000,37 @@
                     );
                 }
 
+
                 progressContainer.appendChild(
                     section
                 );
             }
 
 
+            if (reachedGoal) {
+
+                const check =
+                    document.createElement(
+                        'div'
+                    );
+
+                check.className =
+                    'css-progress-check';
+
+                check.textContent =
+                    '✓';
+
+                progressContainer.appendChild(
+                    check
+                );
+            }
+
+
             goalText.textContent =
-                `${Math.min(completed, goal)} / ${goal} today`;
+                `${Math.min(
+                    completed,
+                    goal
+                )} / ${goal} today`;
         }
 
 
@@ -705,7 +1041,9 @@
         function createForm(id, data) {
 
             const form =
-                document.createElement('div');
+                document.createElement(
+                    'div'
+                );
 
             form.className =
                 'css-form';
@@ -720,6 +1058,35 @@
 
                     <div class="css-form-id">
                         Exercise ${id}
+                    </div>
+
+                    <div class="css-form-actions">
+
+                        <button
+                            class="css-graph js-graph"
+                            type="button"
+                            aria-label="View statistics"
+                        >
+
+                            <svg
+                                class="css-graph-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M3 17V9"></path>
+                                <path d="M8 17V5"></path>
+                                <path d="M13 17V11"></path>
+                                <path d="M18 17V3"></path>
+                            </svg>
+
+                            Graph
+
+                        </button>
+
                     </div>
 
                 </div>
@@ -846,7 +1213,9 @@
 
 
             const startButton =
-                form.querySelector('.js-start');
+                form.querySelector(
+                    '.js-start'
+                );
 
 
             startButton.addEventListener(
@@ -861,25 +1230,289 @@
                     const id =
                         form.dataset.id;
 
-
-                    /*
-                     * Count one completed exercise
-                     * when Start is pressed.
-                     */
                     increaseTodayCount(id);
 
                     updateProgress(form);
 
-                    startExercise(settings);
-
+                    startExercise(
+                        settings
+                    );
                 }
             );
 
 
-            formsContainer.appendChild(form);
+            const graphButton =
+                form.querySelector(
+                    '.js-graph'
+                );
+
+
+            graphButton.addEventListener(
+                'click',
+                () => {
+
+                    showStatistics(id);
+                }
+            );
+
+
+            formsContainer.appendChild(
+                form
+            );
 
             updateProgress(form);
         }
+
+
+        /* =========================
+           STATISTICS
+           ========================= */
+
+        function showStatistics(id) {
+
+            const forms =
+                loadForms();
+
+            const data =
+                forms[id];
+
+            if (!data) {
+                return;
+            }
+
+            statisticsTitle.textContent =
+                `Exercise ${id}`;
+
+            if (data.dayGoal) {
+
+                statisticsSubtitle.textContent =
+                    `Daily goal: ${data.dayGoal} exercises`;
+
+            } else {
+
+                statisticsSubtitle.textContent =
+                    'No daily goal set';
+
+            }
+
+            renderCalendar(data);
+
+            statisticsScreen.classList.add(
+                'css-active'
+            );
+        }
+
+
+        function renderCalendar(data) {
+
+            calendarDays.innerHTML =
+                '';
+
+            const now =
+                new Date();
+
+            /*
+             * Show the previous calendar month.
+             */
+            const year =
+                now.getFullYear();
+
+            const month =
+                now.getMonth() ;
+
+            const firstDay =
+                new Date(
+                    year,
+                    month,
+                    1
+                );
+
+            const lastDay =
+                new Date(
+                    year,
+                    month + 1,
+                    0
+                );
+
+            const daysInMonth =
+                lastDay.getDate();
+
+            let firstWeekday =
+                firstDay.getDay();
+
+            /*
+             * Convert Sunday=0 to
+             * Monday=0.
+             */
+            firstWeekday =
+                firstWeekday === 0
+                    ? 6
+                    : firstWeekday - 1;
+
+
+            calendarMonth.textContent =
+                firstDay.toLocaleDateString(
+                    undefined,
+                    {
+                        month: 'long',
+                        year: 'numeric'
+                    }
+                );
+
+
+            /*
+             * Empty cells before
+             * the first day.
+             */
+            for (
+                let i = 0;
+                i < firstWeekday;
+                i++
+            ) {
+
+                const empty =
+                    document.createElement(
+                        'div'
+                    );
+
+                empty.className =
+                    'css-calendar-day css-empty';
+
+                calendarDays.appendChild(
+                    empty
+                );
+            }
+
+
+            let achieved = 0;
+
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const date =
+                    new Date(
+                        year,
+                        month,
+                        day
+                    );
+
+                const dateString =
+                    formatDate(date);
+
+                const count =
+                    data.history &&
+                    data.history[dateString]
+                        ? Number(
+                            data.history[
+                                dateString
+                            ]
+                        )
+                        : 0;
+
+                const goal =
+                    Number(
+                        data.dayGoal || 0
+                    );
+
+                const complete =
+                    goal > 0 &&
+                    count >= goal;
+
+
+                if (complete) {
+                    achieved++;
+                }
+
+
+                const dayElement =
+                    document.createElement(
+                        'div'
+                    );
+
+                dayElement.className =
+                    'css-calendar-day';
+
+                if (complete) {
+
+                    dayElement.classList.add(
+                        'css-day-complete'
+                    );
+
+                    dayElement.textContent =
+                        '✓';
+
+                    dayElement.title =
+                        `${dateString}: goal achieved`;
+
+                } else {
+
+                    dayElement.textContent =
+                        day;
+
+                    if (goal > 0) {
+
+                        dayElement.title =
+                            `${dateString}: ${count} / ${goal}`;
+                    }
+                }
+
+
+                if (
+                    dateString === getToday()
+                ) {
+
+                    dayElement.classList.add(
+                        'css-day-today'
+                    );
+                }
+
+
+                calendarDays.appendChild(
+                    dayElement
+                );
+            }
+
+
+            achievedDisplay.textContent =
+                achieved;
+
+            totalDaysDisplay.textContent =
+                daysInMonth;
+        }
+
+
+        function formatDate(date) {
+
+            const year =
+                date.getFullYear();
+
+            const month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(2, '0');
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+
+        closeStatisticsButton.addEventListener(
+            'click',
+            () => {
+
+                statisticsScreen.classList.remove(
+                    'css-active'
+                );
+            }
+        );
 
 
         /* =========================
@@ -952,7 +1585,8 @@
                 Object.keys(forms)
                     .sort(
                         (a, b) =>
-                            Number(a) - Number(b)
+                            Number(a) -
+                            Number(b)
                     );
 
 
@@ -985,10 +1619,6 @@
                 const data =
                     forms[id];
 
-                /*
-                 * Backward compatibility with
-                 * previously saved forms.
-                 */
                 if (
                     data.dayGoal === undefined
                 ) {
@@ -1000,7 +1630,6 @@
                 ) {
                     data.history = {};
                 }
-
 
                 createForm(
                     id,
@@ -1044,9 +1673,6 @@
                 'Ready?';
 
 
-            /*
-             * Ready?
-             */
             runReadyCountdown(
                 3,
                 () => {
@@ -1057,15 +1683,10 @@
                         settings.hold,
                         settings.rest
                     );
-
                 }
             );
         }
 
-
-        /* =========================
-           READY COUNTDOWN
-           ========================= */
 
         function runReadyCountdown(
             seconds,
@@ -1092,7 +1713,6 @@
             countdownDisplay.textContent =
                 remaining;
 
-
             const startTime =
                 Date.now();
 
@@ -1100,7 +1720,8 @@
             function update() {
 
                 const elapsed =
-                    Date.now() - startTime;
+                    Date.now() -
+                    startTime;
 
                 const current =
                     Math.ceil(
@@ -1109,7 +1730,9 @@
                     );
 
 
-                if (current !== remaining) {
+                if (
+                    current !== remaining
+                ) {
 
                     remaining =
                         Math.max(
@@ -1122,7 +1745,10 @@
                 }
 
 
-                if (elapsed >= seconds * 1000) {
+                if (
+                    elapsed >=
+                    seconds * 1000
+                ) {
 
                     clearInterval(timer);
 
@@ -1143,10 +1769,6 @@
             update();
         }
 
-
-        /* =========================
-           REPEATS
-           ========================= */
 
         function runRepeat(
             currentRepeat,
@@ -1186,20 +1808,13 @@
                             } else {
 
                                 showSuccess();
-
                             }
-
                         }
                     );
-
                 }
             );
         }
 
-
-        /* =========================
-           TIMER PHASE
-           ========================= */
 
         function runPhase(
             phase,
@@ -1221,7 +1836,6 @@
 
             successDisplay.hidden =
                 true;
-
 
             circle.className =
                 `css-circle css-${phaseClass}`;
@@ -1247,12 +1861,11 @@
                         elapsed
                     );
 
-
                 const remainingSeconds =
                     Math.ceil(
-                        remainingMs / 1000
+                        remainingMs /
+                        1000
                     );
-
 
                 countdownDisplay.textContent =
                     remainingSeconds;
@@ -1264,7 +1877,6 @@
                         remainingMs /
                         durationMs
                     );
-
 
                 progress.style.strokeDashoffset =
                     circumference *
@@ -1294,10 +1906,6 @@
                 );
         }
 
-
-        /* =========================
-           SUCCESS
-           ========================= */
 
         function showSuccess() {
 
