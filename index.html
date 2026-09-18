@@ -62,11 +62,24 @@
 
         .css-form-id {
             color: #756d7c;
-            font-size: 13px;
+            font-size: 18px;
             font-weight: 800;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
+
+        .css-form-id.css-exercise-name { cursor: pointer; }
+        .css-form-id.css-exercise-name:hover { color: #c4b5fd; }
+
+        .css-delete-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,.72); }
+        .css-delete-modal.css-active { display: flex; }
+        .css-delete-dialog { width: 100%; max-width: 360px; padding: 24px; border: 1px solid #30263d; border-radius: 18px; background: #151217; text-align: center; }
+        .css-delete-title { margin: 0 0 10px; font-size: 24px; font-weight: 900; }
+        .css-delete-text { margin: 0 0 22px; color: #a99bb5; font-size: 15px; line-height: 1.45; }
+        .css-delete-actions { display: flex; gap: 8px; }
+        .css-delete-cancel, .css-delete-confirm { flex: 1; height: 50px; border: 0; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; }
+        .css-delete-cancel { border: 1px solid #30263d; background: #0d0d0f; color: #fff; }
+        .css-delete-confirm { background: #ef4444; color: #fff; }
 
         .css-form-actions {
             display: flex;
@@ -119,7 +132,7 @@
 
         .css-label {
             color: #756d7c;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
         }
 
@@ -262,7 +275,7 @@
             min-height: 29px;
             margin-bottom: 30px;
             color: #c4b5fd;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 800;
         }
 
@@ -285,6 +298,10 @@
 
         .css-circle.css-ready {
             background: #28232d;
+            
+        }
+        .css-circle.css-ready .css-countdown{
+            color: white;
         }
 
         .css-circle-svg {
@@ -339,7 +356,7 @@
         .css-repeat {
             margin-top: 30px;
             color: #756d7c;
-            font-size: 16px;
+            font-size: 24px;
             font-weight: 700;
         }
 
@@ -659,6 +676,16 @@
 
     </section>
 
+    <div class="css-delete-modal js-delete-modal" role="dialog" aria-modal="true">
+        <div class="css-delete-dialog">
+            <h3 class="css-delete-title">Delete exercise?</h3>
+            <p class="css-delete-text js-delete-text"></p>
+            <div class="css-delete-actions">
+                <button class="css-delete-cancel js-delete-cancel" type="button">Cancel</button>
+                <button class="css-delete-confirm js-delete-confirm" type="button">Delete</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const STORAGE_KEY =
@@ -718,6 +745,11 @@
         const closeStatisticsButton =
             document.querySelector('.js-close-statistics');
 
+        const deleteModal = document.querySelector('.js-delete-modal');
+        const deleteText = document.querySelector('.js-delete-text');
+        const cancelDeleteButton = document.querySelector('.js-delete-cancel');
+        const confirmDeleteButton = document.querySelector('.js-delete-confirm');
+        let exerciseToDelete = null;
 
         const radius = 135;
 
@@ -1056,7 +1088,7 @@
 
                 <div class="css-form-header">
 
-                    <div class="css-form-id">
+                    <div class="css-form-id css-exercise-name js-exercise-name" role="button" tabindex="0" title="Delete exercise">
                         Exercise ${id}
                     </div>
 
@@ -1256,12 +1288,55 @@
             );
 
 
+            const exerciseName = form.querySelector('.js-exercise-name');
+            exerciseName.addEventListener('click', () => showDeleteExerciseDialog(id));
+            exerciseName.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    showDeleteExerciseDialog(id);
+                }
+            });
+
             formsContainer.appendChild(
                 form
             );
 
             updateProgress(form);
         }
+
+
+        /* =========================
+           DELETE EXERCISE
+           ========================= */
+
+        function showDeleteExerciseDialog(id) {
+            exerciseToDelete = id;
+            deleteText.textContent = `Exercise ${id} and all of its statistics data will be deleted from local storage.`;
+            deleteModal.classList.add('css-active');
+            cancelDeleteButton.focus();
+        }
+
+        function closeDeleteExerciseDialog() {
+            exerciseToDelete = null;
+            deleteModal.classList.remove('css-active');
+        }
+
+        function deleteExercise() {
+            if (exerciseToDelete === null) return;
+            const id = String(exerciseToDelete);
+            const forms = loadForms();
+            delete forms[id];
+            saveForms(forms);
+            const form = Array.from(formsContainer.querySelectorAll('.css-form')).find(el => el.dataset.id === id);
+            if (form) form.remove();
+            closeDeleteExerciseDialog();
+        }
+
+        confirmDeleteButton.addEventListener('click', deleteExercise);
+        cancelDeleteButton.addEventListener('click', closeDeleteExerciseDialog);
+        deleteModal.addEventListener('click', event => {
+            if (event.target === deleteModal) closeDeleteExerciseDialog();
+        });
 
 
         /* =========================
@@ -1780,37 +1855,30 @@
             repeatDisplay.textContent =
                 `Repeat ${currentRepeat} / ${totalRepeats}`;
 
-
             runPhase(
                 'Hold',
                 hold,
                 'hold',
                 () => {
 
-                    runPhase(
-                        'Rest',
-                        rest,
-                        'rest',
-                        () => {
-
-                            if (
-                                currentRepeat <
-                                totalRepeats
-                            ) {
-
+                    if (currentRepeat < totalRepeats) {
+                        runPhase(
+                            'Rest',
+                            rest,
+                            'rest',
+                            () => {
                                 runRepeat(
                                     currentRepeat + 1,
                                     totalRepeats,
                                     hold,
                                     rest
                                 );
-
-                            } else {
-
-                                showSuccess();
                             }
-                        }
-                    );
+                        );
+                    } else {
+                        // No rest after the final hold.
+                        showSuccess();
+                    }
                 }
             );
         }
